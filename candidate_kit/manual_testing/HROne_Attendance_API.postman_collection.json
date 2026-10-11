@@ -1,0 +1,1977 @@
+{
+  "info": {
+    "name": "HROne Attendance API - manual tests",
+    "description": "Run in order against an EMPTY database (see MANUAL_TESTING.md step 0). Each request has a test that checks the expected status code.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. System",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. Returns {\"status\":\"ok\"} only when MongoDB answers. Stop Mongo and it returns 503."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Employees",
+      "item": [
+        {
+          "name": "Create EMP0001 (day shift)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. created_at comes back as epoch milliseconds; no _id in the response.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"name\": \"Asha\",\n  \"email\": \"asha@example.com\",\n  \"department\": \"Engineering\",\n  \"shift_start\": \"09:30\",\n  \"shift_end\": \"18:30\",\n  \"joined_on\": \"2026-01-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create EMP0002 (joins mid-month)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. Joined 15 July: July working days are counted from the 15th.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0002\",\n  \"name\": \"Ravi\",\n  \"email\": \"ravi@example.com\",\n  \"department\": \"Engineering\",\n  \"shift_start\": \"09:30\",\n  \"shift_end\": \"18:30\",\n  \"joined_on\": \"2026-07-15\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create EMP0003 (overnight shift)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. Shift 22:00-06:00: shift_end <= shift_start means overnight.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0003\",\n  \"name\": \"Meera\",\n  \"email\": \"meera@example.com\",\n  \"department\": \"Operations\",\n  \"shift_start\": \"22:00\",\n  \"shift_end\": \"06:00\",\n  \"joined_on\": \"2026-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create EMP0004 (will never have logs)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. Still counts in Operations headcount.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0004\",\n  \"name\": \"Karan\",\n  \"email\": \"karan@example.com\",\n  \"department\": \"Operations\",\n  \"shift_start\": \"09:30\",\n  \"shift_end\": \"18:30\",\n  \"joined_on\": \"2026-01-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Duplicate emp_code -> 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 409. Unique index on emp_code.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"name\": \"Asha\",\n  \"email\": \"asha@example.com\",\n  \"department\": \"Engineering\",\n  \"shift_start\": \"09:30\",\n  \"shift_end\": \"18:30\",\n  \"joined_on\": \"2026-01-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Invalid employee -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/employees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. Bad emp_code format and shift_start == shift_end.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"E1\",\n  \"name\": \"Bad\",\n  \"email\": \"bad@example.com\",\n  \"department\": \"Engineering\",\n  \"shift_start\": \"10:00\",\n  \"shift_end\": \"10:00\",\n  \"joined_on\": \"2026-02-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "List employees (sorted, paged)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees?page=1&page_size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Expected: 200. 4 employees sorted by emp_code; total = 4."
+          }
+        },
+        {
+          "name": "List employees by department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/employees?department=Operations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "employees"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "Operations"
+                }
+              ]
+            },
+            "description": "Expected: 200. total = 2 (filtered count, not whole collection)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Punch in / out",
+      "item": [
+        {
+          "name": "Punch-in late (10:05 IST, 6 Jul)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. date 2026-07-06, late_minutes 35 (counted from 09:30), work_hours null.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783312500000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Same day again -> 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 409. Unique (emp_code, date) index.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783314000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Unknown employee -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 404. ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP9999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Seconds instead of ms -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. 1783312500 looks like seconds; must be milliseconds.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783312500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Status ABSENT at punch-in -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. Only PRESENT, WFH, ON_DUTY are allowed at punch-in.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"status\": \"ABSENT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Punch-out 19:10 IST",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-out"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. work_hours 9.08, overtime_minutes 40 (>= 30), half_day false.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783345200000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Punch-out again -> 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 409\", function () { pm.response.to.have.status(409); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-out"
+              ],
+              "query": []
+            },
+            "description": "Expected: 409. Already punched out.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783346000000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Overnight punch-in 21:55 IST",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. date 2026-07-06, late 0 (before 22:00 start).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0003\",\n  \"punched_at\": 1783355100000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Overnight punch-out 06:40 next day",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-out"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. Same record (date 2026-07-06); work_hours 8.75; overtime 40 (shift ended 06:00 on the 7th).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0003\",\n  \"punched_at\": 1783386600000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "WFH punch-in 10:00 IST, 7 Jul",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. status WFH, late_minutes 30.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783398600000,\n  \"status\": \"WFH\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "WFH punch-out 13:30 -> half day",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-out"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. work_hours 3.5 < 4.50 so half_day true.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783411200000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Grace boundary 09:40:01, 8 Jul",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201\", function () { pm.response.to.have.status(201); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-in"
+              ],
+              "query": []
+            },
+            "description": "Expected: 201. 10:01 after shift start: strictly more than 10:00, so late_minutes = 10.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783483801000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Punch-out 18:30, 8 Jul",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/punch-out",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "punch-out"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. overtime 0 (no minutes after shift end).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emp_code\": \"EMP0001\",\n  \"punched_at\": 1783515600000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. List attendance",
+      "item": [
+        {
+          "name": "All records of EMP0001",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/attendance?emp_code=EMP0001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "emp_code",
+                  "value": "EMP0001"
+                }
+              ]
+            },
+            "description": "Expected: 200. 3 records, newest date first; instants are epoch ms; no id."
+          }
+        },
+        {
+          "name": "Date range + status filter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/attendance?date_from=2026-07-06&date_to=2026-07-08&status=WFH",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "date_from",
+                  "value": "2026-07-06"
+                },
+                {
+                  "key": "date_to",
+                  "value": "2026-07-08"
+                },
+                {
+                  "key": "status",
+                  "value": "WFH"
+                }
+              ]
+            },
+            "description": "Expected: 200. Only the WFH record of 7 Jul."
+          }
+        },
+        {
+          "name": "date_from after date_to -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/attendance?date_from=2026-07-08&date_to=2026-07-06",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "date_from",
+                  "value": "2026-07-08"
+                },
+                {
+                  "key": "date_to",
+                  "value": "2026-07-06"
+                }
+              ]
+            },
+            "description": "Expected: 422. "
+          }
+        },
+        {
+          "name": "page_size over 100 -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/attendance?page_size=101",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "101"
+                }
+              ]
+            },
+            "description": "Expected: 422. "
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Corrections (PATCH)",
+      "item": [
+        {
+          "name": "Fix punch-in to 09:28 (biometric glitch)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-06",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-06"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. late_minutes 35 -> 0, work_hours 9.08 -> 9.7; history gets 1 entry listing only changed fields.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"punch_in\": 1783310280000,\n  \"reason\": \"biometric glitch\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Same change again -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-06",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-06"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. Nothing would change.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"punch_in\": 1783310280000,\n  \"reason\": \"biometric glitch\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Punch-in on another day -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-06",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-06"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. punch_in must stay on the record's date (R1).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"punch_in\": 1783395000000,\n  \"reason\": \"wrong day test\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Mark 8 Jul as LEAVE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-08",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-08"
+              ],
+              "query": []
+            },
+            "description": "Expected: 200. punch_in/punch_out cleared, work_hours null, late 0; history entry added.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"LEAVE\",\n  \"reason\": \"approved leave\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "ABSENT with a punch time -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-07"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. ABSENT/LEAVE can't have punch times.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ABSENT\",\n  \"punch_in\": 1783398600000,\n  \"reason\": \"invalid combo\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Reason too short -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-07"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. reason needs 5-200 characters.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PRESENT\",\n  \"reason\": \"x\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "No record for that date -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance/EMP0001/2026-07-20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "attendance",
+                "EMP0001",
+                "2026-07-20"
+              ],
+              "query": []
+            },
+            "description": "Expected: 404. ",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"WFH\",\n  \"reason\": \"no such record\",\n  \"regularized_by\": \"hr.admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Analytics",
+      "item": [
+        {
+          "name": "Monthly summary EMP0001",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/EMP0001/monthly?month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "EMP0001",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. working_days 23, present_days 1.5 (6 Jul = 1, 7 Jul half day = 0.5, 8 Jul LEAVE = 0), leave_days 1, late_count 1, total_late_minutes 30, total_overtime_minutes 40, attendance_pct 6.52."
+          }
+        },
+        {
+          "name": "Monthly summary mid-month joiner",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/EMP0002/monthly?month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "EMP0002",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. working_days 13 (from 15 Jul), present_days 0, attendance_pct 0.0."
+          }
+        },
+        {
+          "name": "Monthly bad month -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/employees/EMP0001/monthly?month=2026-13",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "employees",
+                "EMP0001",
+                "monthly"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-13"
+                }
+              ]
+            },
+            "description": "Expected: 422. "
+          }
+        },
+        {
+          "name": "Department summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/departments/summary?month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "departments",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. Engineering: headcount 2, present_days 1.5, avg_work_hours 6.6. Operations: headcount 2 (EMP0004 has no logs but counts), present_days 1, avg 8.75."
+          }
+        },
+        {
+          "name": "Late leaderboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/leaderboard/late?month=2026-07&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "leaderboard",
+                "late"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Expected: 200. EMP0001 rank 1 with 30 late minutes (ties are covered by tests/smoke_test.py)."
+          }
+        },
+        {
+          "name": "Department trend (7 days)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/departments/Engineering/trend?from=2026-07-06&to=2026-07-12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "departments",
+                "Engineering",
+                "trend"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-07-06"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-12"
+                }
+              ]
+            },
+            "description": "Expected: 200. 7 rows incl. weekend. attendance_rate 1.0, 0.5, 0.0, 0.0, 0.0, null, null; moving_avg_7d 1.0, 0.75, 0.5, 0.375, 0.3, 0.3, 0.3."
+          }
+        },
+        {
+          "name": "Trend to < from -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/departments/Engineering/trend?from=2026-07-12&to=2026-07-06",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "departments",
+                "Engineering",
+                "trend"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-07-12"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-06"
+                }
+              ]
+            },
+            "description": "Expected: 422. "
+          }
+        },
+        {
+          "name": "Trend unknown department -> 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 404\", function () { pm.response.to.have.status(404); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/analytics/departments/Nope/trend?from=2026-07-06&to=2026-07-12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "analytics",
+                "departments",
+                "Nope",
+                "trend"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-07-06"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-12"
+                }
+              ]
+            },
+            "description": "Expected: 404. "
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Admin explain",
+      "item": [
+        {
+          "name": "Explain attendance_list",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/attendance_list?emp_code=EMP0001",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "attendance_list"
+              ],
+              "query": [
+                {
+                  "key": "emp_code",
+                  "value": "EMP0001"
+                }
+              ]
+            },
+            "description": "Expected: 200. Search the output for \"IXSCAN\" (index used). There must be no \"COLLSCAN\"."
+          }
+        },
+        {
+          "name": "Explain employee_monthly",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/employee_monthly?emp_code=EMP0001&month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "employee_monthly"
+              ],
+              "query": [
+                {
+                  "key": "emp_code",
+                  "value": "EMP0001"
+                },
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. "
+          }
+        },
+        {
+          "name": "Explain department_summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/department_summary?month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "department_summary"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. Runs on the employees collection."
+          }
+        },
+        {
+          "name": "Explain late_leaderboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/late_leaderboard?month=2026-07",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "late_leaderboard"
+              ],
+              "query": [
+                {
+                  "key": "month",
+                  "value": "2026-07"
+                }
+              ]
+            },
+            "description": "Expected: 200. "
+          }
+        },
+        {
+          "name": "Explain department_trend",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/department_trend?department=Engineering&from=2026-07-06&to=2026-07-12",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "department_trend"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "Engineering"
+                },
+                {
+                  "key": "from",
+                  "value": "2026-07-06"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-07-12"
+                }
+              ]
+            },
+            "description": "Expected: 200. "
+          }
+        },
+        {
+          "name": "Explain missing params -> 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/admin/explain/employee_monthly",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "explain",
+                "employee_monthly"
+              ],
+              "query": []
+            },
+            "description": "Expected: 422. "
+          }
+        }
+      ]
+    }
+  ]
+}
